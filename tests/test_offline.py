@@ -20,6 +20,15 @@ import subprocess
 import sys
 import tempfile
 
+# Windows 控制台/管道默认不是 UTF-8（常见 cp1252），直接 print 中文会抛
+# UnicodeEncodeError 并以退出码 1 结束 —— Linux/macOS 默认 UTF-8 不会。
+# CI 在 windows-latest 上必踩，这里统一改掉。
+for _s in (sys.stdout, sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        pass
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 PY = sys.executable

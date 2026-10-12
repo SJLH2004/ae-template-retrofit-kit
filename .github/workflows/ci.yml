@@ -22,8 +22,20 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install ffmpeg
-        uses: FedericoCarboni/setup-ffmpeg@v3
+      # 按系统用原生包管理器装 ffmpeg。
+      # 不用第三方 setup-ffmpeg action：它只支持 x64，
+      # 而 GitHub 的 macos-latest 已是 arm64，会直接断言失败。
+      - name: Install ffmpeg (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Install ffmpeg (macOS)
+        if: runner.os == 'macOS'
+        run: brew install ffmpeg
+
+      - name: Install ffmpeg (Windows)
+        if: runner.os == 'Windows'
+        run: choco install ffmpeg -y --no-progress
 
       - name: Install Python dependencies
         run: |

@@ -6,17 +6,20 @@ __pycache__/
 venv/
 env/
 
-# ---- 运行产物（脚本会生成，不进版本库）----
-out/
-seg/
-grade/
-preview/
-verify/
-probe.json
-probe2.json
-summary.txt
+# ---- 运行产物 ----
+# 注意：必须用前导 / 锚定到仓库根目录。
+# 若写成 grade/ ，它会同时匹配源码目录 scripts/grade/ ，
+# 导致该目录下的脚本被静默排除、不会进入版本库。
+/out/
+/seg/
+/grade/
+/preview/
+/verify/
+/probe.json
+/probe2.json
+/summary.txt
 
-# 自检会生成测试样例视频，可安全删除、下次自动重建
+# 自检生成的测试样例视频（可安全删除，下次自动重建）
 tests/sample/*.mp4
 
 # ---- 中间文件 ----
