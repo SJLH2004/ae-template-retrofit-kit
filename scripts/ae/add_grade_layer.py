@@ -4,13 +4,22 @@
 幂等：重复运行会先删掉同名的旧图层再重建。
 
 用法:
-  python add_grade_layer.py --project <工程.aep> [--width 1920] [--height 1080] \
-      [--dur-min 29.5] [--dur-max 30.5] [--layer QINGLV_GRADE] \
-      [--cb -12,16,8]
+  python add_grade_layer.py --project <工程.aep> [--mode gamma|global] [参数]
 
---cb 三个值对应「红色平衡 / 绿色平衡 / 蓝色平衡」（-100..100）。
-示例（青绿设色，配 ffmpeg 同款思路）：--cb -12,16,8
-偏重就加大绿色、减小红色，例如 --cb -18,24,10。
+两种模式：
+  gamma（推荐）  用 Levels 分通道 gamma 染色：纯黑纯白端点不动，只有中间调
+                 被染色——宣纸白底不会被染绿。参数 --gammas R,G,B
+                 注意方向：gamma>1 = 提亮该通道（中间调最敏感），<1 = 压暗。
+                 青绿设色（压红提绿）：--gammas 0.90,1.12,1.00
+                 （已用 ffmpeg eq=gamma_r/gamma_g/gamma_b 同原理验证：
+                  高光偏色 25 vs 全局偏移 41，暗部呈墨绿而非红棕）
+  global         旧方案：Color Balance 三个滑块做全局 RGB 偏移。实现简单，
+                 但会把接近白色的宣纸底一起染色（实测白底偏色 41 vs 分区 25），
+                 这就是"整幅发绿发怪"的原因。保留只为兼容。
+
+示例:
+  python add_grade_layer.py --project 新工程.aep --mode gamma --gammas 0.90,1.12,1.00
+  python add_grade_layer.py --project 新工程.aep --mode global --cb -12,16,8
 """
 import argparse
 import json
@@ -40,18 +49,23 @@ JSX = os.path.join(HERE, "jsx", "add_grade_layer.jsx")
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--project", required=True)
+    ap.add_argument("--mode", choices=["gamma", "global"], default="gamma")
+    ap.add_argument("--gammas", default="0.90,1.12,1.00",
+                    help="gamma 模式：红,绿,蓝。gamma>1 提亮该通道（中间调最敏感），"
+                         "<1 压暗。青绿设色（压红提绿）：0.90,1.12,1.00")
     ap.add_argument("--width", type=int, default=1920)
     ap.add_argument("--height", type=int, default=1080)
     ap.add_argument("--dur-min", type=float, default=29.5)
     ap.add_argument("--dur-max", type=float, default=30.5)
     ap.add_argument("--layer", default="QINGLV_GRADE")
-    ap.add_argument("--cb", default="-12,16,8", help="red,green,blue balance")
+    ap.add_argument("--cb", default="-12,16,8", help="global 模式：红,绿,蓝平衡")
     ap.add_argument("--timeout", type=int, default=300)
     args = ap.parse_args()
 
     cb = [int(x) for x in args.cb.split(",")]
-    if len(cb) != 3:
-        ap.error("--cb needs exactly 3 numbers")
+    gammas = [float(x) for x in args.gammas.split(",")]
+    if len(cb) != 3 or len(gammas) != 3:
+        ap.error("--cb and --gammas each need exactly 3 numbers")
 
     work = WORK
     os.makedirs(work, exist_ok=True)
@@ -61,7 +75,8 @@ def main():
         os.remove(local_out)
 
     cfg = {"w": args.width, "h": args.height, "durMin": args.dur_min,
-           "durMax": args.dur_max, "layer": args.layer, "cb": cb}
+           "durMax": args.dur_max, "layer": args.layer, "cb": cb,
+           "mode": args.mode, "gammas": gammas}
     src = open(JSX, encoding="ascii", errors="ignore").read()
     src = (src.replace("__OUT__", out_path)
               .replace("__AEP__", args.project.replace("\\", "/"))

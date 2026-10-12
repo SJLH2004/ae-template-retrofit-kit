@@ -80,18 +80,52 @@ try {
     if (comp.layer(1) !== adj) { adj.moveBefore(comp.layer(1)); }
     res.steps.push("adjustment layer added on top");
 
-    var fx = adj.property("ADBE Effect Parade").addProperty("ADBE Color Balance");
-    var names = [], sliders = 0, p, pr;
+    var fx = adj.property("ADBE Effect Parade").addProperty(
+        CFG.mode === "gamma" ? "ADBE Easy Levels" : "ADBE Color Balance");
+    var names = [], setCount = 0, p, pr;
     for (p = 1; p <= fx.numProperties; p++) {
         pr = fx.property(p);
         names.push(p + ":" + pr.name + "[" + pr.matchName + "]");
-        if (pr.propertyType === PropertyType.PROPERTY && pr.value !== null &&
-            typeof pr.value === "number" && sliders < CFG.cb.length) {
-            try { pr.setValue(CFG.cb[sliders]); sliders++; } catch (e1) {}
-        }
     }
     res.cbParams = names;
-    res.steps.push("color balance sliders set: " + sliders);
+
+    if (CFG.mode === "gamma") {
+        /* Easy Levels per-channel gamma: endpoints (0/255) stay put, midtones shift
+           the most -> paper-white highlights are NOT tinted. This is the AE-side
+           equivalent of ffmpeg's zoned colorbalance.
+           Params verified on AE 2023: -0001 channel popup, -0005 gamma.
+           ("ADBE Levels" / "ADBE Curves" do NOT exist on this build.) */
+        function setGamma(ch, g) {
+            fx.property("ADBE Easy Levels-0001").setValue(ch);
+            fx.property("ADBE Easy Levels-0005").setValue(g);
+        }
+        try {
+            setGamma(2, CFG.gammas[0]);   // Red   <1 darkens red midtones (>1 lifts)
+            setGamma(3, CFG.gammas[1]);   // Green >1 lifts green midtones
+            setGamma(4, CFG.gammas[2]);   // Blue  ~1 = neutral
+            setCount = 3;
+            var rb = [];
+            for (var cc = 1; cc <= 5; cc++) {
+                fx.property("ADBE Easy Levels-0001").setValue(cc);
+                rb.push("ch" + cc + "=" + fx.property("ADBE Easy Levels-0005").value);
+            }
+            res.readback = rb;
+            res.steps.push("gamma set R=" + CFG.gammas[0] + " G=" + CFG.gammas[1] +
+                           " B=" + CFG.gammas[2] + " | readback " + rb.join(" "));
+        } catch (eG) {
+            res.steps.push("WARN gamma set failed: " + String(eG));
+        }
+    } else {
+        for (p = 1; p <= fx.numProperties; p++) {
+            pr = fx.property(p);
+            if (pr.propertyType === PropertyType.PROPERTY && pr.value !== null &&
+                typeof pr.value === "number" && setCount < CFG.cb.length) {
+                try { pr.setValue(CFG.cb[setCount]); setCount++; } catch (e1) {}
+            }
+        }
+        res.steps.push("color balance sliders set: " + setCount);
+    }
+    res.setCount = setCount;
 
     app.project.save();
     res.steps.push("project saved");

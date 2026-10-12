@@ -61,8 +61,26 @@ def find_ae():
 
 
 AFTERFX, AERENDER = find_ae()
-# ASCII 工作区，绝不放中文路径（AE 的 -r 和脚本 File 都对中文路径不友好）
-WORK = os.environ.get("AEBRIDGE_WORK") or os.path.join(tempfile.gettempdir(), "ae_bridge_work")
+
+
+def _pick_work():
+    """挑一个**纯 ASCII** 的工作目录。
+
+    铁律：AE 的 -r 投放和 ExtendScript 的 File API 都对中文路径不友好。
+    曾经把这里改成 tempfile.gettempdir()，结果在中文用户名机器上得到
+    C:\\Users\\中文\\AppData\\...，Jsx 写结果文件被 catch 静默吞掉
+    -> Python 侧只看到"超时无结果"，极难排查（脚本其实是执行成功的）。
+    """
+    cands = [os.environ.get("AEBRIDGE_WORK"),
+             os.path.join(os.environ.get("SystemRoot", r"C:\Windows"), "Temp", "ae_bridge_work"),
+             os.path.join(tempfile.gettempdir(), "ae_bridge_work")]
+    for c in cands:
+        if c and all(ord(ch) < 128 for ch in c):
+            return c
+    return r"C:\ae_bridge_work"
+
+
+WORK = _pick_work()
 
 
 def _win_process_names():

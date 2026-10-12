@@ -74,7 +74,7 @@ python scripts/qc/preview_mp4.py --video 成片.mp4 --times 0.5,3,8,14,19,27
 | `retrofit_project.py` | `--src` `--save` `--config` | 批量改造，配置驱动 |
 | `verify_project.py` | `--project` `--out` | 回读确认改对了 |
 | `fix_timeline.py` | `--split` `--total` `--pre1` `--pre2` | 修正 precomp 衔接 |
-| `add_grade_layer.py` | `--project` `--cb 红,绿,蓝` `--layer` | 挂调色层，幂等 |
+| `add_grade_layer.py` | `--mode gamma\|global` `--gammas` `--cb` `--layer` | 挂调色层，幂等。gamma 模式端点不动只染中间调（推荐）；global 是全局偏移会连白底一起染 |
 | `spec_check.py` | `--expect WxH@fps` `--min-duration` | 规格校验，不通过 exit 1 |
 | `segcheck.py` | `--step` `--threshold` | 分段切换点检测 |
 | `colstat.py` | `--video` 或 `--frames-dir` | 灰色占比/饱和度/主色 |
@@ -97,8 +97,8 @@ ffmpeg -y -i 成片.mp4 \
   -vf "colorbalance=rs=-0.15:gs=0.20:bs=0.10:rm=-0.08:gm=0.16:bm=0.05:rh=0.03:gh=0.01:bh=-0.05,eq=saturation=1.35:contrast=1.06" \
   -c:v libx264 -preset medium -crf 18 -pix_fmt yuv420p -movflags +faststart -an 青绿版.mp4
 
-# 3) 同步把工程配色改掉，以后重渲不用再调
-python scripts/ae/add_grade_layer.py --project 新工程.aep --cb -12,16,8
+# 3) 同步把工程配色改掉，以后重渲不用再调（gamma 模式：端点不动，只染中间调）
+python scripts/ae/add_grade_layer.py --project 新工程.aep --mode gamma --gammas 0.90,1.12,1.00
 ```
 
 青绿设色（《千里江山图》思路）配色参考：石绿 `#1E7A5A`、竹青 `#3B9E6F`、
