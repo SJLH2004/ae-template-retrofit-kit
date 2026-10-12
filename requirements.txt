@@ -1,0 +1,4 @@
+# 运行依赖（ffmpeg / ffprobe 需另行安装并加入 PATH）
+opencv-python>=4.8.0
+numpy>=1.24.0
+pillow>=10.0.0

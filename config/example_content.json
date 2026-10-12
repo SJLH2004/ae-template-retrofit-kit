@@ -1,0 +1,68 @@
+{
+  "_comment": "水墨分镜类模板的改造配置示例（新青年·芳草行）。字段含义见 docs/WORKFLOW.md。markers 是原模板里用来识别占位文字层的关键词，必须先用 probe_project.py 探明你的模板再填。",
+
+  "comp_names": {
+    "main": "总合成",
+    "pre1": "1",
+    "pre2": "2",
+    "ending_comp": "2",
+    "title": "标题",
+    "text_prefix": "文字合成",
+    "img_prefix": "图片",
+    "group_count": 6
+  },
+
+  "markers": {
+    "l1": "江南",
+    "updown": ["镇", "古"],
+    "pinyin": ["XI", "TANG"],
+    "poem": "船上管弦",
+    "title_main": "会议江南",
+    "ending": "魅力江南"
+  },
+
+  "title_y": [380, 611, 819, 1020],
+
+  "timeline": {
+    "split": 24.8,
+    "total": 30,
+    "img_early": { "comp": "图片05", "detect_min": 20, "detect_max": 30, "set": 23.0 }
+  },
+
+  "indent_spaces": 31,
+
+  "groups": [
+    { "comp": "文字合成01", "l1": "三湘", "up": "青", "dn": "年",
+      "py": "          SAN\rXIANG",
+      "po": "湘江潮涌青春起\r                               芳草连天万里行" },
+    { "comp": "文字合成02", "l1": "振兴", "up": "乡", "dn": "村",
+      "py": "        ZHEN\rXING",
+      "po": "稻浪千重沃野阔\r                               新村如画入潇湘" },
+    { "comp": "文字合成03", "l1": "升级", "up": "文", "dn": "旅",
+      "py": "          WEN\rLV",
+      "po": "奇峰入云迎客至\r                               文旅融合势如虹" },
+    { "comp": "文字合成04", "l1": "特色", "up": "品", "dn": "牌",
+      "py": "          PIN\rPAI",
+      "po": "一县一品香远溢\r                               湘字号里见匠心" },
+    { "comp": "文字合成05", "l1": "创意", "up": "公", "dn": "益",
+      "py": "        GONG\rYI",
+      "po": "微光成炬暖山乡\r                               青春志愿正当时" },
+    { "comp": "文字合成06", "l1": "远行", "up": "芳", "dn": "草",
+      "py": "         FANG\rCAO",
+      "po": "芳草萋萋连湘水\r                               青春作伴好远行" }
+  ],
+
+  "title": { "l1": "新青年·芳草行", "up": ["芳", "草", "行"] },
+
+  "end": "湖湘沃土育新青年\r                               芳草万里正当时",
+  "endEN": "New Youth - Fragrant Grass Journey",
+
+  "imgs": [
+    "C:/path/to/img01.jpg",
+    "C:/path/to/img02.jpg",
+    "C:/path/to/img03.jpg",
+    "C:/path/to/img04.jpg",
+    "C:/path/to/img05.jpg",
+    "C:/path/to/img06.jpg"
+  ]
+}

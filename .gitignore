@@ -1,0 +1,48 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# ---- 运行产物（脚本会生成，不进版本库）----
+out/
+seg/
+grade/
+preview/
+verify/
+probe.json
+probe2.json
+summary.txt
+
+# 自检会生成测试样例视频，可安全删除、下次自动重建
+tests/sample/*.mp4
+
+# ---- 中间文件 ----
+*.tmp
+*.log
+
+# ---- AE / 剪辑工程与素材（体积大或含项目内容，绝不入库）----
+*.aep
+*.aepx
+*.prproj
+*.mov
+*.MOV
+*.mp4
+*.MP4
+*.wav
+*.mp3
+*.psd
+*.tif
+*.tiff
+
+# ---- 编辑器 / 系统 ----
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ---- 脚本生成的本机批处理 ----
+*_transcode.bat
+*bgm*.bat
